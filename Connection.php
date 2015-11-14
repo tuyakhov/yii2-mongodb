@@ -7,6 +7,7 @@
 
 namespace yii\mongodb;
 
+use MongoDB\Client;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use Yii;
@@ -109,7 +110,7 @@ class Connection extends Component
      */
     public $defaultDatabaseName;
     /**
-     * @var \MongoClient Mongo client instance.
+     * @var Client Mongo client instance.
      */
     public $mongoClient;
 
@@ -169,7 +170,7 @@ class Connection extends Component
 
         return Yii::createObject([
             'class' => 'yii\mongodb\Database',
-            'mongoDb' => $this->mongoClient->selectDB($name)
+            'mongoDb' => $this->mongoClient->selectDatabase($name)
         ]);
     }
 
@@ -221,7 +222,7 @@ class Connection extends Component
      */
     public function getIsActive()
     {
-        return is_object($this->mongoClient) && $this->mongoClient->getConnections() != [];
+        return is_object($this->mongoClient);
     }
 
     /**
@@ -244,7 +245,7 @@ class Connection extends Component
                 if ($this->defaultDatabaseName !== null) {
                     $options['db'] = $this->defaultDatabaseName;
                 }
-                $this->mongoClient = new \MongoClient($this->dsn, $options);
+                $this->mongoClient = new Client($this->dsn, $options);
                 $this->initConnection();
                 Yii::endProfile($token, __METHOD__);
             } catch (\Exception $e) {

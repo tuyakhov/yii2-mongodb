@@ -23,7 +23,7 @@ use yii\helpers\Json;
 class Database extends Object
 {
     /**
-     * @var \MongoDB Mongo database instance.
+     * @var \MongoDB\Database Mongo database instance.
      */
     public $mongoDb;
 

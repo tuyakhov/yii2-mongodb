@@ -19,7 +19,8 @@
     ],
     "require": {
         "yiisoft/yii2": ">=2.0.x-dev",
-        "ext-mongodb": ">=1.0.0"
+        "ext-mongodb": ">=1.0.0",
+        "mongodb/mongodb": "*"
     },
     "autoload": {
         "psr-4": { "yii\\mongodb\\": "" }
