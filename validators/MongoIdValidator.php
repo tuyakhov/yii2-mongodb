@@ -7,13 +7,14 @@
 
 namespace yii\mongodb\validators;
 
+use MongoDB\BSON\ObjectID;
 use yii\base\InvalidConfigException;
 use yii\validators\Validator;
 use Yii;
 
 /**
  * MongoIdValidator verifies if the attribute is a valid Mongo ID.
- * Attribute will be considered as valid, if it is an instance of [[\MongoId]] or a its string value.
+ * Attribute will be considered as valid, if it is an instance of [[ObjectID]] or a its string value.
  *
  * Usage example:
  *
@@ -24,14 +25,14 @@ use Yii;
  *     public function rules()
  *     {
  *         return [
- *             ['_id', 'yii\mongodb\validators\MongoIdValidator']
+ *             ['_id', 'yii\mongodb\validatorsObjectIDValidator']
  *         ];
  *     }
  * }
  * ~~~
  *
  * This validator may also serve as a filter, allowing conversion of Mongo ID value either to the plain string
- * or to [[\MongoId]] instance. You can enable this feature via [[forceFormat]].
+ * or to [[ObjectID]] instance. You can enable this feature via [[forceFormat]].
  *
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 2.0.4
@@ -43,7 +44,7 @@ class MongoIdValidator extends Validator
      * in case validation was successful.
      * valid values are:
      * - 'string' - enforce value converted to plain string.
-     * - 'object' - enforce value converted to [[\MongoId]] instance.
+     * - 'object' - enforce value converted to [[ObjectID]] instance.
      * If not set - no conversion will be performed, leaving attribute value intact.
      */
     public $forceFormat;
@@ -97,15 +98,15 @@ class MongoIdValidator extends Validator
 
     /**
      * @param mixed $value
-     * @return \MongoId|null
+     * @return ObjectID|null
      */
     private function parseMongoId($value)
     {
-        if ($value instanceof \MongoId) {
+        if ($value instanceof ObjectID) {
             return $value;
         }
         try {
-            return new \MongoId($value);
+            return new ObjectID($value);
         } catch (\Exception $e) {
             return null;
         }

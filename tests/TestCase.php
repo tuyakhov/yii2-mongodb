@@ -26,8 +26,8 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        if (!extension_loaded('mongo')) {
-            $this->markTestSkipped('mongo extension required.');
+        if (!extension_loaded('mongodb')) {
+            $this->markTestSkipped('mongodb extension required.');
         }
         $config = self::getParam('mongodb');
         if (!empty($config)) {
@@ -157,7 +157,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $cursor = $collection->find($condition, $fields);
         $result = [];
         foreach ($cursor as $data) {
-            $result[] = $data;
+            $result[] = (array)$data;
         }
 
         return $result;
@@ -170,8 +170,8 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected function getServerVersion()
     {
         $connection = $this->getConnection();
-        $buildInfo = $connection->getDatabase()->executeCommand(['buildinfo' => true]);
-
-        return $buildInfo['version'];
+        $cursor = $connection->getDatabase()->executeCommand(['buildinfo' => true]);
+        $buildInfo = current($cursor->toArray());
+        return $buildInfo->version;
     }
 }

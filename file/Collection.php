@@ -73,7 +73,7 @@ class Collection extends \yii\mongodb\Collection
      * @param string $filename name of the file to store.
      * @param array $metadata other metadata fields to include in the file document.
      * @param array $options list of options in format: optionName => optionValue
-     * @return mixed the "_id" of the saved file document. This will be a generated [[\MongoId]]
+     * @return mixed the "_id" of the saved file document. This will be a generated [[ObjectID]]
      * unless an "_id" was explicitly specified in the metadata.
      * @throws Exception on failure.
      */
@@ -100,7 +100,7 @@ class Collection extends \yii\mongodb\Collection
      * @param string $bytes string of bytes to store.
      * @param array $metadata other metadata fields to include in the file document.
      * @param array $options list of options in format: optionName => optionValue
-     * @return mixed the "_id" of the saved file document. This will be a generated [[\MongoId]]
+     * @return mixed the "_id" of the saved file document. This will be a generated [[ObjectID]]
      * unless an "_id" was explicitly specified in the metadata.
      * @throws Exception on failure.
      */
@@ -127,7 +127,7 @@ class Collection extends \yii\mongodb\Collection
      * @param string $name name of the uploaded file to store. This should correspond to
      * the file field's name attribute in the HTML form.
      * @param array $metadata other metadata fields to include in the file document.
-     * @return mixed the "_id" of the saved file document. This will be a generated [[\MongoId]]
+     * @return mixed the "_id" of the saved file document. This will be a generated [[ObjectID]]
      * unless an "_id" was explicitly specified in the metadata.
      * @throws Exception on failure.
      */

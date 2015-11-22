@@ -25,7 +25,7 @@ class DatabaseTest extends TestCase
 
         $collection = $database->getCollection('customer');
         $this->assertTrue($collection instanceof Collection);
-        $this->assertTrue($collection->mongoCollection instanceof \MongoCollection);
+        $this->assertTrue($collection->mongoCollection instanceof \MongoDB\Collection);
 
         $collection2 = $database->getCollection('customer');
         $this->assertTrue($collection === $collection2);
@@ -40,7 +40,7 @@ class DatabaseTest extends TestCase
 
         $collection = $database->getFileCollection('testfs');
         $this->assertTrue($collection instanceof FileCollection);
-        $this->assertTrue($collection->mongoCollection instanceof \MongoGridFS);
+        $this->assertTrue($collection->mongoCollection instanceof \MongoDB\Collection);
 
         $collection2 = $database->getFileCollection('testfs');
         $this->assertTrue($collection === $collection2);
@@ -53,10 +53,11 @@ class DatabaseTest extends TestCase
     {
         $database = $connection = $this->getConnection()->getDatabase();
 
-        $result = $database->executeCommand([
+        $cursor = $database->executeCommand([
             'distinct' => 'customer',
             'key' => 'name'
         ]);
+        $result = current($cursor->toArray());
         $this->assertTrue(array_key_exists('ok', $result));
         $this->assertTrue(array_key_exists('values', $result));
     }
@@ -65,6 +66,6 @@ class DatabaseTest extends TestCase
     {
         $database = $connection = $this->getConnection()->getDatabase();
         $collection = $database->createCollection('customer');
-        $this->assertTrue($collection instanceof \MongoCollection);
+        $this->assertTrue($collection instanceof \MongoDB\Collection);
     }
 }

@@ -7,6 +7,9 @@
 
 namespace yii\mongodb;
 
+use MongoDB\Collection;
+use MongoDB\Driver\Command;
+use MongoDB\Driver\ReadPreference;
 use yii\base\Object;
 use Yii;
 use yii\helpers\Json;
@@ -97,7 +100,7 @@ class Database extends Object
     {
         return Yii::createObject([
             'class' => 'yii\mongodb\file\Collection',
-            'mongoCollection' => $this->mongoDb->getGridFS($prefix)
+            'mongoCollection' => $this->mongoDb->selectCollection($prefix)
         ]);
     }
 
@@ -108,7 +111,7 @@ class Database extends Object
      * you need to create collection with the specific options.
      * @param string $name name of the collection
      * @param array $options collection options in format: "name" => "value"
-     * @return \MongoCollection new Mongo collection instance.
+     * @return object new Mongo collection instance.
      * @throws Exception on failure.
      */
     public function createCollection($name, $options = [])
@@ -119,8 +122,8 @@ class Database extends Object
             Yii::beginProfile($token, __METHOD__);
             $result = $this->mongoDb->createCollection($name, $options);
             Yii::endProfile($token, __METHOD__);
-
-            return $result;
+            $this->tryResultError($result);
+            return $this->mongoDb->selectCollection($name);
         } catch (\Exception $e) {
             Yii::endProfile($token, __METHOD__);
             throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
@@ -140,7 +143,8 @@ class Database extends Object
         Yii::info($token, __METHOD__);
         try {
             Yii::beginProfile($token, __METHOD__);
-            $result = $this->mongoDb->command($command, $options);
+            $command = new Command($command);
+            $result = $this->mongoDb->executeCommand($command, new ReadPreference(ReadPreference::RP_PRIMARY));
             $this->tryResultError($result);
             Yii::endProfile($token, __METHOD__);
 

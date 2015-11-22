@@ -120,7 +120,7 @@ class SessionTest extends TestCase
     {
         $session = $this->createSession();
         $collection = $session->db->getCollection($session->sessionCollection);
-        $collection->batchInsert([
+        $rows = [
             [
                 'id' => uniqid(),
                 'expire' => time() + 10,
@@ -131,7 +131,8 @@ class SessionTest extends TestCase
                 'expire' => time() - 10,
                 'data' => 'expired',
             ],
-        ]);
+        ];
+        $collection->batchInsert($rows);
         $this->assertTrue($session->gcSession(10), 'Unable to collection garbage session!');
 
         $rows = $this->findAll($collection);

@@ -203,7 +203,7 @@ class QueryRunTest extends TestCase
         $connection = $this->getConnection();
         $query = new Query;
         $rows = $query->from('customer')
-            ->where(['REGEX', 'name', '/me1/'])
+            ->where(['REGEX', 'name', 'me1'])
             ->all($connection);
         $this->assertEquals(2, count($rows));
         $this->assertEquals('name1', $rows[0]['name']);
@@ -303,9 +303,11 @@ class QueryRunTest extends TestCase
         $query = new Query();
         $rows = $query->from('customer')
             ->options([
-                '$min' => [
-                    'status' => 9
-                ],
+                'modifiers' => [
+                    '$min' => [
+                        'status' => 9
+                    ],
+                ]
             ])
             ->all($connection);
 

@@ -7,6 +7,7 @@
 
 namespace yii\mongodb;
 
+use MongoDB\Driver\Cursor;
 use yii\base\Component;
 use yii\db\QueryInterface;
 use yii\db\QueryTrait;
@@ -134,27 +135,29 @@ class Query extends Component implements QueryInterface
     /**
      * Builds the Mongo cursor for this query.
      * @param Connection $db the database connection used to execute the query.
-     * @return \MongoCursor mongo cursor instance.
+     * @return Cursor mongo cursor instance.
      */
     protected function buildCursor($db = null)
     {
-        $cursor = $this->getCollection($db)->find($this->composeCondition(), $this->composeSelectFields());
+        $queryOptions = [
+            'limit' => $this->limit,
+            'skip' => max($this->offset, 0)
+        ];
+
         if (!empty($this->orderBy)) {
-            $cursor->sort($this->composeSort());
+            $queryOptions['sort'] = $this->composeSort();
         }
-        $cursor->limit($this->limit);
-        $cursor->skip($this->offset);
-
         foreach ($this->options as $key => $value) {
-            $cursor->addOption($key, $value);
+            $queryOptions[$key] = $value;
         }
 
+        $cursor = $this->getCollection($db)->find($this->composeCondition(), $this->composeSelectFields(), $queryOptions);
         return $cursor;
     }
 
     /**
      * Fetches rows from the given Mongo cursor.
-     * @param \MongoCursor $cursor Mongo cursor instance to fetch data from.
+     * @param Cursor $cursor Mongo cursor instance to fetch data from.
      * @param boolean $all whether to fetch all rows or only first one.
      * @param string|callable $indexBy the column name or PHP callback,
      * by which the query results should be indexed by.
@@ -163,7 +166,7 @@ class Query extends Component implements QueryInterface
      */
     protected function fetchRows($cursor, $all = true, $indexBy = null)
     {
-        $token = 'find(' . Json::encode($cursor->info()) . ')';
+        $token = 'find(' . Json::encode(get_object_vars($cursor)) . ')';
         Yii::info($token, __METHOD__);
         try {
             Yii::beginProfile($token, __METHOD__);
@@ -173,12 +176,12 @@ class Query extends Component implements QueryInterface
             return $result;
         } catch (\Exception $e) {
             Yii::endProfile($token, __METHOD__);
-            throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
+            throw new Exception($e->getMessage(), (int)$e->getCode(), $e);
         }
     }
 
     /**
-     * @param \MongoCursor $cursor Mongo cursor instance to fetch data from.
+     * @param Cursor $cursor Mongo cursor instance to fetch data from.
      * @param boolean $all whether to fetch all rows or only first one.
      * @param string|callable $indexBy value to index by.
      * @return array|boolean result.
@@ -189,11 +192,11 @@ class Query extends Component implements QueryInterface
         $result = [];
         if ($all) {
             foreach ($cursor as $row) {
-                $result[] = $row;
+                $result[] = (array) $row;
             }
         } else {
-            if ($row = $cursor->getNext()) {
-                $result = $row;
+            if ($row = current($cursor->toArray())) {
+                $result = (array) $row;
             } else {
                 $result = false;
             }
@@ -280,17 +283,17 @@ class Query extends Component implements QueryInterface
     public function count($q = '*', $db = null)
     {
         $cursor = $this->buildCursor($db);
-        $token = 'find.count(' . Json::encode($cursor->info()) . ')';
+        $token = 'find.count(' . Json::encode(get_object_vars($cursor)) . ')';
         Yii::info($token, __METHOD__);
         try {
             Yii::beginProfile($token, __METHOD__);
-            $result = $cursor->count();
+            $result = count($cursor->toArray());
             Yii::endProfile($token, __METHOD__);
 
             return $result;
         } catch (\Exception $e) {
             Yii::endProfile($token, __METHOD__);
-            throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
+            throw new Exception($e->getMessage(), (int)$e->getCode(), $e);
         }
     }
 
@@ -381,7 +384,7 @@ class Query extends Component implements QueryInterface
         ];
         $result = $collection->aggregate($pipelines);
         if (array_key_exists(0, $result)) {
-            return $result[0]['total'];
+            return $result[0]->total;
         } else {
             return 0;
         }
@@ -452,10 +455,10 @@ class Query extends Component implements QueryInterface
         foreach ($this->orderBy as $fieldName => $sortOrder) {
             switch ($sortOrder) {
                 case SORT_ASC:
-                    $sort[$fieldName] = \MongoCollection::ASCENDING;
+                    $sort[$fieldName] = Collection::ASCENDING;
                     break;
                 case SORT_DESC:
-                    $sort[$fieldName] = \MongoCollection::DESCENDING;
+                    $sort[$fieldName] = Collection::DESCENDING;
                     break;
                 default:
                     $sort[$fieldName] = $sortOrder;
