@@ -335,7 +335,7 @@ class Collection extends Object
      */
     public function find($condition = [], $fields = [], $options = [])
     {
-        if (!isset($options['projection'])) {
+        if (!isset($options['projection']) && !empty($fields)) {
             $options['projection'] = $fields;
         }
         $cursor = $this->mongoCollection->find($this->buildCondition($condition), $options);
@@ -353,7 +353,7 @@ class Collection extends Object
      */
     public function findOne($condition = [], $fields = [], $options = [])
     {
-        if (!isset($options['projection'])) {
+        if (!isset($options['projection']) && !empty($fields)) {
             $options['projection'] = $fields;
         }
         return (array) $this->mongoCollection->findOne($this->buildCondition($condition), $options);
@@ -588,54 +588,6 @@ class Collection extends Object
             Yii::endProfile($token, __METHOD__);
 
             return $result;
-        } catch (\Exception $e) {
-            Yii::endProfile($token, __METHOD__);
-            throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
-        }
-    }
-
-    /**
-     * Performs aggregation using Mongo "group" command.
-     * @param mixed $keys fields to group by. If an array or non-code object is passed,
-     * it will be the key used to group results. If instance of [[\MongoCode]] passed,
-     * it will be treated as a function that returns the key to group by.
-     * @param array $initial Initial value of the aggregation counter object.
-     * @param Javascript|string $reduce function that takes two arguments (the current
-     * document and the aggregation to this point) and does the aggregation.
-     * Argument will be automatically cast to [[\MongoCode]].
-     * @param array $options optional parameters to the group command. Valid options include:
-     *  - condition - criteria for including a document in the aggregation.
-     *  - finalize - function called once per unique key that takes the final output of the reduce function.
-     * @return array the result of the aggregation.
-     * @throws Exception on failure.
-     * @see http://docs.mongodb.org/manual/reference/command/group/
-     */
-    public function group($keys, $initial, $reduce, $options = [])
-    {
-        if (!($reduce instanceof Javascript)) {
-            $reduce = new Javascript((string) $reduce);
-        }
-        if (array_key_exists('condition', $options)) {
-            $options['condition'] = $this->buildCondition($options['condition']);
-        }
-        if (array_key_exists('finalize', $options)) {
-            if (!($options['finalize'] instanceof Javascript)) {
-                $options['finalize'] = new Javascript((string) $options['finalize']);
-            }
-        }
-        $token = $this->composeLogToken('group', [$keys, $initial, $reduce, $options]);
-        Yii::info($token, __METHOD__);
-        try {
-            Yii::beginProfile($token, __METHOD__);
-            // Avoid possible E_DEPRECATED for $options:
-            if (empty($options)) {
-                $result = $this->mongoCollection->group($keys, $initial, $reduce);
-            } else {
-                $result = $this->mongoCollection->group($keys, $initial, $reduce, $options);
-            }
-            $this->tryResultError($result);
-            Yii::endProfile($token, __METHOD__);
-            return !empty($result) ? ArrayHelper::toArray($result) : $result;
         } catch (\Exception $e) {
             Yii::endProfile($token, __METHOD__);
             throw new Exception($e->getMessage(), (int) $e->getCode(), $e);

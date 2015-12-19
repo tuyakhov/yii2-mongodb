@@ -22,15 +22,9 @@
       "email": "klimov.paul@gmail.com"
     }
   ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/tuyakhov/mongo-php-library"
-    }
-  ],
   "require": {
-    "yiisoft/yii2": ">=2.0.x-dev",
-    "ext-mongodb": ">=1.0.0",
+    "yiisoft/yii2": ">=2.0.4",
+    "ext-mongodb": ">=1.1.0",
     "mongodb/mongodb": "dev-master"
   },
   "autoload": {
