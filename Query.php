@@ -140,7 +140,7 @@ class Query extends Component implements QueryInterface
     protected function buildCursor($db = null)
     {
         $queryOptions = [
-            'limit' => $this->limit,
+            'limit' => max($this->limit, 0),
             'skip' => max($this->offset, 0)
         ];
 

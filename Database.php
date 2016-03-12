@@ -87,7 +87,8 @@ class Database extends Object
     {
         return Yii::createObject([
             'class' => 'yii\mongodb\Collection',
-            'mongoCollection' => $this->mongoDb->selectCollection($name)
+            'mongoCollection' => $this->mongoDb->selectCollection($name),
+            'mongoDb' => $this->mongoDb
         ]);
     }
 
@@ -144,7 +145,7 @@ class Database extends Object
         try {
             Yii::beginProfile($token, __METHOD__);
             $command = new Command($command);
-            $result = $this->mongoDb->executeCommand($command, new ReadPreference(ReadPreference::RP_PRIMARY));
+            $result = $this->mongoDb->command($command);
             $this->tryResultError($result);
             Yii::endProfile($token, __METHOD__);
 
