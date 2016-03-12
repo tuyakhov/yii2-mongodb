@@ -91,6 +91,11 @@ class Collection extends Object
      */
     public $mongoCollection;
 
+    /**
+     * @var \MongoDB\Database
+     */
+    public $mongoDb;
+
 
     /**
      * @return string name of this collection.
@@ -662,7 +667,7 @@ class Collection extends Object
             Yii::beginProfile($token, __METHOD__);
             $command = array_merge(['mapReduce' => $this->getName()], $command);
             $command = new Command($command);
-            $cursor = $this->mongoCollection->executeCommand($command, new ReadPreference(ReadPreference::RP_PRIMARY));
+            $cursor = $this->mongoDb->command($command);
             $this->tryResultError($cursor);
             Yii::endProfile($token, __METHOD__);
             $result = current($cursor->toArray());
@@ -705,7 +710,7 @@ class Collection extends Object
         try {
             Yii::beginProfile($token, __METHOD__);
             $command = array_merge(['text' => $this->getName()], $command);
-            $cursor = $this->mongoCollection->db->command($command);
+            $cursor = $this->mongoDb->command($command);
             $this->tryResultError($cursor);
             Yii::endProfile($token, __METHOD__);
             $result = current($cursor->toArray());
